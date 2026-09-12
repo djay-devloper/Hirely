@@ -31,6 +31,10 @@ export const postJob = async (req, res) => {
         });
     } catch (error) {
         console.log(error);
+        return res.status(500).json({
+            message: "Unable to post job.",
+            success: false
+        });
     }
 }
 // student k liye
@@ -58,6 +62,10 @@ export const getAllJobs = async (req, res) => {
         })
     } catch (error) {
         console.log(error);
+        return res.status(500).json({
+            message: "Unable to fetch jobs.",
+            success: false
+        });
     }
 }
 // student
@@ -76,6 +84,10 @@ export const getJobById = async (req, res) => {
         return res.status(200).json({ job, success: true });
     } catch (error) {
         console.log(error);
+        return res.status(500).json({
+            message: "Unable to fetch job.",
+            success: false
+        });
     }
 }
 // admin kitne job create kra hai abhi tk
