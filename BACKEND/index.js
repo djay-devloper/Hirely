@@ -8,7 +8,7 @@ import companyRoute from "./routes/company.route.js";
 import jobRoute from "./routes/job.route.js";
 import applicationRoute from "./routes/application.route.js";
 
-dotenv.config({});
+dotenv.config({ path: new URL(".env", import.meta.url) });
 
 const requiredEnv = ["MONGO_URI", "SECRET_KEY", "CLOUD_NAME", "API_KEY", "API_SECRET"];
 const missingEnv = requiredEnv.filter((name) => !process.env[name]);
@@ -48,8 +48,16 @@ app.use("/api/v1/application", applicationRoute);
 
 const startServer = async () => {
     await connectDB();
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
         console.log(`Server running at port ${PORT}`);
+    });
+    server.on("error", (error) => {
+        if (error.code === "EADDRINUSE") {
+            console.error(`Port ${PORT} is already in use. Stop the existing backend before starting another one.`);
+            process.exitCode = 1;
+            return;
+        }
+        throw error;
     });
 };
 
