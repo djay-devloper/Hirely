@@ -4,10 +4,23 @@ import { Bookmark } from 'lucide-react'
 import { Avatar, AvatarImage } from './ui/avatar'
 import { Badge } from './ui/badge'
 import { useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 
 const Job = ({job}) => {
     const navigate = useNavigate();
-    // const jobId = "lsekdhjgdsnfvsdkjf";
+    const { allAppliedJobs } = useSelector(store => store.job);
+    const userApplication = allAppliedJobs.find((application) => {
+        const appliedJobId = typeof application?.job === 'object' ? application.job?._id : application?.job;
+        return appliedJobId === job?._id;
+    });
+    const applicationStatus = userApplication?.status?.toLowerCase() || null;
+
+    const formatSalary = (salary) => {
+        if (!salary) return 'N/A';
+        const value = String(salary).trim();
+        const normalized = value.toLowerCase().replace(/\s*lpa\s*$/, ' LPA');
+        return normalized.replace(/\s+/g, ' ').trim();
+    };
 
     const daysAgoFunction = (mongodbTime) => {
         const createdAt = new Date(mongodbTime);
@@ -42,7 +55,14 @@ const Job = ({job}) => {
             <div className='flex items-center gap-2 mt-4'>
                 <Badge className={'text-blue-700 font-bold'} variant="ghost">{job?.position} Positions</Badge>
                 <Badge className={'text-[#F83002] font-bold'} variant="ghost">{job?.jobType}</Badge>
-                <Badge className={'text-[#7209b7] font-bold'} variant="ghost">{job?.salary}LPA</Badge>
+                <Badge className={'text-[#7209b7] font-bold'} variant="ghost">{formatSalary(job?.salary)}</Badge>
+            </div>
+            <div className='flex items-center gap-2 mt-4'>
+                {applicationStatus && (
+                    <Badge className={`${applicationStatus === 'rejected' ? 'bg-red-400' : applicationStatus === 'pending' ? 'bg-gray-400' : 'bg-green-400'} text-white`}>
+                        {applicationStatus.toUpperCase()}
+                    </Badge>
+                )}
             </div>
             <div className='flex items-center gap-4 mt-4'>
                 <Button onClick={()=> navigate(`/description/${job?._id}`)} variant="outline">Details</Button>

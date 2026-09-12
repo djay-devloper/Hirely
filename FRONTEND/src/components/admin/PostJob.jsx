@@ -11,7 +11,9 @@ import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 
-const companyArray = [];
+const locationOptions = ["Delhi", "Gurugram", "Bangalore", "Hyderabad", "Pune", "Mumbai"];
+const jobTypeOptions = ["Full Time", "Part Time", "Work From Home", "Internship"];
+const experienceOptions = ["Fresher", "0-2 Years", "2-5 Years"];
 
 const PostJob = () => {
     const [input, setInput] = useState({
@@ -74,6 +76,7 @@ const PostJob = () => {
                             <Input
                                 type="text"
                                 name="title"
+                                placeholder="Frontend Developer"
                                 value={input.title}
                                 onChange={changeEventHandler}
                                 className="focus-visible:ring-offset-0 focus-visible:ring-0 my-1"
@@ -84,6 +87,7 @@ const PostJob = () => {
                             <Input
                                 type="text"
                                 name="description"
+                                placeholder="Build modern user interfaces and collaborate with the product team."
                                 value={input.description}
                                 onChange={changeEventHandler}
                                 className="focus-visible:ring-offset-0 focus-visible:ring-0 my-1"
@@ -94,6 +98,7 @@ const PostJob = () => {
                             <Input
                                 type="text"
                                 name="requirements"
+                                placeholder="React, JavaScript, HTML, CSS, Git"
                                 value={input.requirements}
                                 onChange={changeEventHandler}
                                 className="focus-visible:ring-offset-0 focus-visible:ring-0 my-1"
@@ -104,6 +109,7 @@ const PostJob = () => {
                             <Input
                                 type="text"
                                 name="salary"
+                                placeholder="10 or 10 LPA"
                                 value={input.salary}
                                 onChange={changeEventHandler}
                                 className="focus-visible:ring-offset-0 focus-visible:ring-0 my-1"
@@ -111,39 +117,55 @@ const PostJob = () => {
                         </div>
                         <div>
                             <Label>Location</Label>
-                            <Input
-                                type="text"
-                                name="location"
-                                value={input.location}
-                                onChange={changeEventHandler}
-                                className="focus-visible:ring-offset-0 focus-visible:ring-0 my-1"
-                            />
+                            <Select value={input.location || undefined} onValueChange={(value) => setInput({ ...input, location: value })}>
+                                <SelectTrigger className="w-full my-1">
+                                    <SelectValue placeholder="Select location" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        {locationOptions.map((location) => (
+                                            <SelectItem key={location} value={location}>{location}</SelectItem>
+                                        ))}
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
                         </div>
                         <div>
                             <Label>Job Type</Label>
-                            <Input
-                                type="text"
-                                name="jobType"
-                                value={input.jobType}
-                                onChange={changeEventHandler}
-                                className="focus-visible:ring-offset-0 focus-visible:ring-0 my-1"
-                            />
+                            <Select value={input.jobType || undefined} onValueChange={(value) => setInput({ ...input, jobType: value })}>
+                                <SelectTrigger className="w-full my-1">
+                                    <SelectValue placeholder="Select job type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        {jobTypeOptions.map((type) => (
+                                            <SelectItem key={type} value={type}>{type}</SelectItem>
+                                        ))}
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
                         </div>
                         <div>
                             <Label>Experience Level</Label>
-                            <Input
-                                type="text"
-                                name="experience"
-                                value={input.experience}
-                                onChange={changeEventHandler}
-                                className="focus-visible:ring-offset-0 focus-visible:ring-0 my-1"
-                            />
+                            <Select value={input.experience || undefined} onValueChange={(value) => setInput({ ...input, experience: value })}>
+                                <SelectTrigger className="w-full my-1">
+                                    <SelectValue placeholder="Select experience" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        {experienceOptions.map((level) => (
+                                            <SelectItem key={level} value={level}>{level}</SelectItem>
+                                        ))}
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
                         </div>
                         <div>
-                            <Label>No of Postion</Label>
+                            <Label>No of Position</Label>
                             <Input
                                 type="number"
                                 name="position"
+                                placeholder="3"
                                 value={input.position}
                                 onChange={changeEventHandler}
                                 className="focus-visible:ring-offset-0 focus-visible:ring-0 my-1"

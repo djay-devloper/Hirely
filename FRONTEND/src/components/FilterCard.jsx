@@ -1,33 +1,41 @@
 import React, { useEffect, useState } from 'react'
 import { RadioGroup, RadioGroupItem } from './ui/radio-group'
 import { Label } from './ui/label'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { setSearchedQuery } from '@/redux/jobSlice'
 
 const fitlerData = [
     {
         fitlerType: "Location",
-        array: ["Delhi NCR", "Bangalore", "Hyderabad", "Pune", "Mumbai"]
+        array: ["Delhi", "Gurugram", "Bangalore", "Hyderabad", "Pune", "Mumbai"]
     },
     {
-        fitlerType: "Industry",
-        array: ["Frontend Developer", "Backend Developer", "FullStack Developer"]
+        fitlerType: "Job Type",
+        array: ["Full Time", "Part Time", "Work From Home", "Internship"]
     },
     {
-        fitlerType: "Salary",
-        array: ["0-40k", "42-1lakh", "1lakh to 5lakh"]
+        fitlerType: "Experience",
+        array: ["Fresher", "0-2 Years", "2-5 Years"]
     },
-]
+].map((group) => ({
+    ...group,
+    array: group.array.map((value) => value.charAt(0).toUpperCase() + value.slice(1))
+}));
 
 const FilterCard = () => {
-    const [selectedValue, setSelectedValue] = useState('');
+    const { searchedQuery } = useSelector(store => store.job);
+    const [selectedValue, setSelectedValue] = useState(searchedQuery || '');
     const dispatch = useDispatch();
+
+    useEffect(() => {
+        setSelectedValue(searchedQuery || '');
+    }, [searchedQuery]);
+
     const changeHandler = (value) => {
         setSelectedValue(value);
+        dispatch(setSearchedQuery(value));
     }
-    useEffect(()=>{
-        dispatch(setSearchedQuery(selectedValue));
-    },[selectedValue]);
+
     return (
         <div className='w-full bg-white p-3 rounded-md'>
             <h1 className='font-bold text-lg'>Filter Jobs</h1>

@@ -30,11 +30,25 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
 
     const fileChangeHandler = (e) => {
         const file = e.target.files?.[0];
+
+        if (file && file.type !== "application/pdf") {
+            toast.error("Only PDF resumes are allowed.");
+            e.target.value = "";
+            setInput({ ...input, file: "" });
+            return;
+        }
+
         setInput({ ...input, file })
     }
 
     const submitHandler = async (e) => {
         e.preventDefault();
+        const file = input.file;
+        if (file && file !== "" && file.type !== "application/pdf") {
+            toast.error("Only PDF resumes are allowed.");
+            return;
+        }
+
         const formData = new FormData();
         formData.append("fullname", input.fullname);
         formData.append("email", input.email);

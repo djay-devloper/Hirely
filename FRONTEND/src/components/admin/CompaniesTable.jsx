@@ -14,7 +14,7 @@ const CompaniesTable = () => {
         const filteredCompany = companies.length >= 0 && companies.filter((company)=>{
             if(!searchCompanyByText){
                 return true
-            };
+            }
             return company?.name?.toLowerCase().includes(searchCompanyByText.toLowerCase());
 
         });
