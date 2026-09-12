@@ -40,22 +40,51 @@ export const postJob = async (req, res) => {
 // student k liye
 export const getAllJobs = async (req, res) => {
     try {
-        const keyword = req.query.keyword || "";
-        const query = {
-            $or: [
+        const keyword = String(req.query.keyword || "").trim();
+        const limit = Number(req.query.limit || 0);
+        const query = {};
+        const exactMatchValues = {
+            location: ["Delhi", "Gurugram", "Bangalore", "Hyderabad", "Pune", "Mumbai"],
+            jobType: ["Full Time", "Part Time", "Work From Home", "Internship"],
+            experienceLevel: ["Fresher", "0-2 Years", "2-5 Years"],
+        };
+
+        const normalizedKeyword = keyword.toLowerCase();
+        const matchedField = Object.entries(exactMatchValues).find(([field, values]) =>
+            values.some((value) => value.toLowerCase() === normalizedKeyword)
+        );
+
+        if (matchedField) {
+            const matchedValue = matchedField[1].find((value) => value.toLowerCase() === normalizedKeyword);
+            query[matchedField[0]] = { $regex: `^${matchedValue.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, $options: "i" };
+        } else if (keyword) {
+            query.$or = [
                 { title: { $regex: keyword, $options: "i" } },
                 { description: { $regex: keyword, $options: "i" } },
-            ]
-        };
-        const jobs = await Job.find(query).populate({
+                { location: { $regex: keyword, $options: "i" } },
+                { jobType: { $regex: keyword, $options: "i" } },
+                { salary: { $regex: keyword, $options: "i" } },
+                { experienceLevel: { $regex: keyword, $options: "i" } },
+            ];
+        }
+
+        let jobsQuery = Job.find(query).populate({
             path: "company"
         }).sort({ createdAt: -1 });
+
+        if (limit > 0) {
+            jobsQuery = jobsQuery.limit(limit);
+        }
+
+        const jobs = await jobsQuery;
+
         if (!jobs) {
             return res.status(404).json({
                 message: "Jobs not found.",
                 success: false
             })
         };
+
         return res.status(200).json({
             jobs,
             success: true
