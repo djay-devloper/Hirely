@@ -20,16 +20,31 @@ if (missingEnv.length > 0) {
 const app = express();
 app.set("trust proxy", 1);
 
-// middleware
 app.use(express.json());
-app.use(express.urlencoded({extended:true}));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-const corsOptions = {
-    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
-    credentials:true
-}
 
-app.use(cors(corsOptions));
+const configuredOrigins = (process.env.FRONTEND_URLS || "")
+    .split(",")
+    .map((origin) => origin.trim().replace(/\/$/, ""))
+    .filter(Boolean);
+const allowedOrigins = new Set([
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:4173",
+    "http://127.0.0.1:4173",
+    ...configuredOrigins
+]);
+
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.has(origin.replace(/\/$/, ""))) {
+            return callback(null, true);
+        }
+        return callback(new Error("Origin is not allowed by CORS"));
+    },
+    credentials: true
+}));
 
 const PORT = process.env.PORT || 8000;
 
@@ -37,27 +52,15 @@ app.get("/health", (req, res) => {
     res.status(200).json({ status: "ok" });
 });
 
-
-// api's
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/company", companyRoute);
 app.use("/api/v1/job", jobRoute);
 app.use("/api/v1/application", applicationRoute);
 
-
-
 const startServer = async () => {
     await connectDB();
-    const server = app.listen(PORT, () => {
+    app.listen(PORT, () => {
         console.log(`Server running at port ${PORT}`);
-    });
-    server.on("error", (error) => {
-        if (error.code === "EADDRINUSE") {
-            console.error(`Port ${PORT} is already in use. Stop the existing backend before starting another one.`);
-            process.exitCode = 1;
-            return;
-        }
-        throw error;
     });
 };
 
