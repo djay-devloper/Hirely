@@ -179,9 +179,8 @@ The production frontend and API are deployed separately. Configure the providers
 
 - Set the project root directory to `FRONTEND`.
 - Use `npm run build` as the build command and `dist` as the output directory.
-- Add `VITE_API_BASE_URL=https://hirely-jbdq.onrender.com` to the Vercel **Production** environment.
-- Redeploy after changing this variable; Vite embeds it at build time.
-- The existing `FRONTEND/vercel.json` rewrite supports client-side routes such as `/copilot`.
+- The `FRONTEND/vercel.json` rewrites `/api/*` requests through Vercel to the Render API and serves the SPA routes, including `/copilot`.
+- Production builds use the same-origin `/api` path, so no `VITE_API_BASE_URL` setting is needed in Vercel. This keeps the HTTP-only auth cookie first-party instead of relying on cross-site cookies.
 
 ### Render backend
 
@@ -193,7 +192,7 @@ The production frontend and API are deployed separately. Configure the providers
 - Configure `MONGO_URI`, `SECRET_KEY`, `CLOUD_NAME`, `API_KEY`, `API_SECRET`, and `GEMINI_API_KEY` as Render environment secrets. `GEMINI_MODEL` and `GEMINI_EMBEDDING_MODEL` may use the defaults in `BACKEND/.env.example`. Configure SMTP variables only if job-alert email delivery is enabled.
 - Let Render provide `PORT`; the server uses it automatically.
 
-Hirely uses credentialed HTTP-only cookies. In production, the backend sets `Secure` and `SameSite=None` cookies and restricts CORS to `FRONTEND_URLS`. Because Vercel and Render are different sites, browsers that block third-party cookies may prevent login from persisting with direct API calls. If that occurs, use a same-site custom domain arrangement or a Vercel API proxy instead of weakening cookie or CORS protections. Render services that sleep on a free plan can also have cold-start delays; use an always-on service for predictable production response times.
+Hirely uses credentialed HTTP-only cookies. In production, the backend sets `Secure` cookies and restricts CORS to `FRONTEND_URLS`; Vercel proxies API requests to Render to avoid third-party-cookie restrictions. Keep `FRONTEND_URLS` set to the exact HTTPS Vercel origin. Render services that sleep on a free plan can also have cold-start delays; use an always-on service for predictable production response times.
 
 ## Getting started
 
