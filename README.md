@@ -171,6 +171,30 @@ If the frontend environment variable is not set, the application falls back to t
 http://localhost:8000
 ```
 
+## Deploying to Vercel and Render
+
+The production frontend and API are deployed separately. Configure the providers with these settings; do not commit provider secrets or production `.env` files.
+
+### Vercel frontend
+
+- Set the project root directory to `FRONTEND`.
+- Use `npm run build` as the build command and `dist` as the output directory.
+- Add `VITE_API_BASE_URL=https://hirely-jbdq.onrender.com` to the Vercel **Production** environment.
+- Redeploy after changing this variable; Vite embeds it at build time.
+- The existing `FRONTEND/vercel.json` rewrite supports client-side routes such as `/copilot`.
+
+### Render backend
+
+- Create a Node web service with `BACKEND` as its root directory.
+- Use `npm ci --omit=dev` as the build command and `npm start` as the start command.
+- Set the health check path to `/health`.
+- Set `NODE_ENV=production`.
+- Set `FRONTEND_URLS` to the exact HTTPS Vercel production origin, for example `https://your-project.vercel.app`. Add additional preview or custom origins as comma-separated exact origins only when needed. Do not include paths or a trailing slash.
+- Configure `MONGO_URI`, `SECRET_KEY`, `CLOUD_NAME`, `API_KEY`, `API_SECRET`, and `GEMINI_API_KEY` as Render environment secrets. `GEMINI_MODEL` and `GEMINI_EMBEDDING_MODEL` may use the defaults in `BACKEND/.env.example`. Configure SMTP variables only if job-alert email delivery is enabled.
+- Let Render provide `PORT`; the server uses it automatically.
+
+Hirely uses credentialed HTTP-only cookies. In production, the backend sets `Secure` and `SameSite=None` cookies and restricts CORS to `FRONTEND_URLS`. Because Vercel and Render are different sites, browsers that block third-party cookies may prevent login from persisting with direct API calls. If that occurs, use a same-site custom domain arrangement or a Vercel API proxy instead of weakening cookie or CORS protections. Render services that sleep on a free plan can also have cold-start delays; use an always-on service for predictable production response times.
+
 ## Getting started
 
 ### 1. Install backend dependencies

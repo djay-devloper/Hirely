@@ -6,6 +6,12 @@ import cloudinary from "../utils/cloudinary.js";
 
 const DEFAULT_PROFILE_PHOTO = "/default-avatar.svg";
 const allowedProfilePhotoTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+const getAuthCookieOptions = () => ({
+    httpOnly:true,
+    secure:process.env.NODE_ENV === "production",
+    sameSite:process.env.NODE_ENV === "production" ? "none" : "lax",
+    path:"/"
+});
 
 export const register = async (req, res) => {
     try {
@@ -159,10 +165,8 @@ export const login = async (req, res) => {
         }
 
         return res.status(200).cookie("token", token, {
+            ...getAuthCookieOptions(),
             maxAge: 1 * 24 * 60 * 60 * 1000,
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
         }).json({
             message: `Welcome back ${user.fullname}`,
             user,
@@ -174,7 +178,7 @@ export const login = async (req, res) => {
 }
 export const logout = async (req, res) => {
     try {
-        return res.status(200).cookie("token", "", { maxAge: 0 }).json({
+        return res.status(200).clearCookie("token", getAuthCookieOptions()).json({
             message: "Logged out successfully.",
             success: true
         })
