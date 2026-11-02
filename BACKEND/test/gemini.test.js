@@ -40,7 +40,7 @@ test("Gemini requests retry temporary service errors", async () => {
     assert.equal(attempts, 2);
 });
 
-test("Gemini reports the upstream error after exhausting temporary retries", async () => {
+test("Gemini reports the upstream error after its single transient retry", async () => {
     process.env.GEMINI_API_KEY = "test-key";
     let attempts = 0;
     globalThis.fetch = async () => {
@@ -62,5 +62,28 @@ test("Gemini reports the upstream error after exhausting temporary retries", asy
         }),
         { message:"Gemini is currently experiencing high demand.", status:503 }
     );
-    assert.equal(attempts, 3);
+    assert.equal(attempts, 2);
+});
+
+test("Gemini request timeouts fail promptly with an actionable message", async () => {
+    process.env.GEMINI_API_KEY = "test-key";
+    let attempts = 0;
+    globalThis.fetch = async () => {
+        attempts += 1;
+        throw new DOMException("Request exceeded timeout.", "TimeoutError");
+    };
+
+    await assert.rejects(
+        generateGeminiJson({
+            systemInstruction:"Return valid JSON.",
+            contents:[{ role:"user", parts:[{ text:"Return OK." }] }],
+            responseSchema:{
+                type:"OBJECT",
+                properties:{ answer:{ type:"STRING" } },
+                required:["answer"]
+            }
+        }),
+        { message:"Gemini took too long to respond. Please try again.", status:504 }
+    );
+    assert.equal(attempts, 1);
 });

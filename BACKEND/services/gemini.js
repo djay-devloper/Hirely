@@ -1,7 +1,8 @@
-const DEFAULT_GENERATION_MODEL = "gemini-3.8-flash";
+const DEFAULT_GENERATION_MODEL = "gemini-3.1-flash-lite";
 const DEFAULT_EMBEDDING_MODEL = "gemini-embedding-001";
 const EMBEDDING_DIMENSIONS = 768;
-const MAX_TRANSIENT_RETRIES = 2;
+const MAX_TRANSIENT_RETRIES = 1;
+const GEMINI_REQUEST_TIMEOUT_MS = 30000;
 const RETRYABLE_STATUS_CODES = new Set([429, 500, 502, 503, 504]);
 
 const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
@@ -29,15 +30,14 @@ const requestGemini = async (model, method, body) => {
                     "x-goog-api-key":apiKey
                 },
                 body:JSON.stringify(body),
-                signal:AbortSignal.timeout(60000)
+                signal:AbortSignal.timeout(GEMINI_REQUEST_TIMEOUT_MS)
             });
         } catch (cause) {
-            if (attempt < MAX_TRANSIENT_RETRIES) {
-                await wait(500 * (2 ** attempt));
-                continue;
-            }
-            const error = new Error("Unable to reach Gemini after retrying. Please try again.");
-            error.status = 502;
+            const timedOut = cause?.name === "TimeoutError" || cause?.name === "AbortError";
+            const error = new Error(timedOut
+                ? "Gemini took too long to respond. Please try again."
+                : "Unable to reach Gemini. Check the backend connection and try again.");
+            error.status = timedOut ? 504 : 502;
             error.cause = cause;
             throw error;
         }
@@ -46,7 +46,11 @@ const requestGemini = async (model, method, body) => {
         if (response.ok) return result;
 
         if (RETRYABLE_STATUS_CODES.has(response.status) && attempt < MAX_TRANSIENT_RETRIES) {
-            await wait(500 * (2 ** attempt));
+            const retryAfterSeconds = Number(response.headers.get("retry-after"));
+            const delay = Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0
+                ? Math.min(retryAfterSeconds * 1000, 2000)
+                : 500;
+            await wait(delay);
             continue;
         }
 

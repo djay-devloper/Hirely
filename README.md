@@ -150,13 +150,13 @@ SMTP_USER=your_smtp_username
 SMTP_PASSWORD=your_smtp_password
 SMTP_FROM=Hirely <alerts@example.com>
 GEMINI_API_KEY=your_gemini_api_key
-GEMINI_MODEL=gemini-3.8-flash
+GEMINI_MODEL=gemini-3.1-flash-lite
 GEMINI_EMBEDDING_MODEL=gemini-embedding-001
 ```
 
 SMTP values are needed to deliver job-alert emails. In-app alerts continue to work without SMTP configuration.
 
-Gemini values are needed for the Job Match Copilot. Keep the API key in the backend `.env` only; it is never sent to the frontend. The default models (`gemini-3.8-flash` and `gemini-embedding-001`) can be overridden with `GEMINI_MODEL` and `GEMINI_EMBEDDING_MODEL`.
+Gemini values are needed for the Job Match Copilot. Keep the API key in the backend `.env` only; it is never sent to the frontend. The default models (`gemini-3.1-flash-lite` and `gemini-embedding-001`) can be overridden with `GEMINI_MODEL` and `GEMINI_EMBEDDING_MODEL`.
 
 ### Frontend
 Create a `.env` file inside the `FRONTEND` folder if needed:
