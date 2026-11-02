@@ -10,21 +10,37 @@ const AlertSubscription = () => {
     const { user } = useSelector(store => store.auth);
     const [searchParams] = useSearchParams();
     const [preferences, setPreferences] = useState(null);
-    const [emailConfigured, setEmailConfigured] = useState(false);
+    const [emailConfigured, setEmailConfigured] = useState(null);
+    const [preferencesLoading, setPreferencesLoading] = useState(true);
+    const [loadError, setLoadError] = useState('');
+    const [loadAttempt, setLoadAttempt] = useState(0);
 
     useEffect(() => {
         if (user?.role !== 'student') return;
+        let cancelled = false;
         const loadPreferences = async () => {
+            setPreferences(null);
+            setEmailConfigured(null);
+            setLoadError('');
+            setPreferencesLoading(true);
             try {
                 const response = await axios.get(`${NOTIFICATIONS_API_END_POINT}/preferences`, { withCredentials:true });
-                setPreferences(response.data.preferences);
-                setEmailConfigured(response.data.emailConfigured);
+                if (!cancelled) {
+                    setPreferences(response.data.preferences);
+                    setEmailConfigured(response.data.emailConfigured);
+                }
             } catch (error) {
                 console.error('Unable to load job alert preferences:', error);
+                if (!cancelled) {
+                    setLoadError(error.response?.data?.message || 'Unable to load job alerts. Please try again.');
+                }
+            } finally {
+                if (!cancelled) setPreferencesLoading(false);
             }
         };
         loadPreferences();
-    }, [user?._id, user?.role]);
+        return () => { cancelled = true; };
+    }, [user?._id, user?.role, loadAttempt]);
 
     const buildPreferences = (enabled) => ({
         enabled,
@@ -62,13 +78,23 @@ const AlertSubscription = () => {
             </span>
             <h2 className="mt-3 font-semibold text-gray-950">Make the next match come to you</h2>
             <p className="my-2 text-sm leading-6 text-gray-600">Get updates when jobs matching these filters are posted.</p>
-            {!emailConfigured && <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800">In-app alerts are available. Email delivery needs SMTP settings.</p>}
+            {!preferencesLoading && !loadError && emailConfigured === false && <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800">In-app alerts are available. Email delivery needs SMTP settings.</p>}
+            {loadError && (
+                <div role="alert" className="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm leading-5 text-red-700">
+                    <p>{loadError}</p>
+                    <button
+                        type="button"
+                        onClick={() => setLoadAttempt((attempt) => attempt + 1)}
+                        className="mt-1 font-semibold underline underline-offset-2"
+                    >Try again</button>
+                </div>
+            )}
             <button
                 type="button"
                 onClick={() => savePreferences(true)}
-                disabled={!preferences}
+                disabled={preferencesLoading || !preferences || Boolean(loadError)}
                 className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl bg-violet-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-violet-700 disabled:cursor-wait disabled:opacity-60"
-            >{!preferences ? <><Loader2 className="h-4 w-4 animate-spin" />Loading alerts</> : preferences.enabled ? 'Update this alert' : 'Create job alert'}</button>
+            >{preferencesLoading ? <><Loader2 className="h-4 w-4 animate-spin" />Loading alerts</> : preferences?.enabled ? 'Update this alert' : 'Create job alert'}</button>
             {preferences?.enabled && (
                 <button
                     type="button"
