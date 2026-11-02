@@ -68,51 +68,64 @@ const PostJob = () => {
     return (
         <div>
             <Navbar />
-            <div className='flex items-center justify-center w-screen my-5'>
-                <form onSubmit = {submitHandler} className='p-8 max-w-4xl border border-gray-200 shadow-lg rounded-md'>
-                    <div className='grid grid-cols-2 gap-2'>
+            <main className="page-container py-8 sm:py-10">
+                <form onSubmit={submitHandler} className='surface-card mx-auto max-w-4xl p-5 sm:p-8'>
+                    <div className="mb-7">
+                        <p className="text-sm font-semibold uppercase tracking-wide text-violet-700">Recruiter workspace</p>
+                        <h1 className="mt-2 text-3xl font-bold tracking-tight text-gray-950">Create a job post</h1>
+                        <p className="mt-1 text-sm text-gray-500">Share the role clearly so the right people can find it.</p>
+                    </div>
+                    <div className='grid gap-x-5 gap-y-4 sm:grid-cols-2'>
                         <div>
-                            <Label>Title</Label>
+                            <Label htmlFor="job-title">Job title</Label>
                             <Input
+                                id="job-title"
                                 type="text"
                                 name="title"
                                 placeholder="Frontend Developer"
                                 value={input.title}
                                 onChange={changeEventHandler}
-                                className="focus-visible:ring-offset-0 focus-visible:ring-0 my-1"
+                                required
+                                className="mt-1.5"
                             />
                         </div>
                         <div>
-                            <Label>Description</Label>
-                            <Input
-                                type="text"
+                            <Label htmlFor="job-description">Description</Label>
+                            <textarea
+                                id="job-description"
                                 name="description"
-                                placeholder="Build modern user interfaces and collaborate with the product team."
                                 value={input.description}
                                 onChange={changeEventHandler}
-                                className="focus-visible:ring-offset-0 focus-visible:ring-0 my-1"
+                                placeholder="Describe the role, team, and what the successful candidate will work on."
+                                rows={4}
+                                required
+                                className="mt-1.5 w-full resize-y rounded-xl border border-input bg-white px-3 py-2.5 text-sm leading-6 shadow-sm outline-none transition placeholder:text-gray-400 focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
                             />
                         </div>
                         <div>
-                            <Label>Requirements</Label>
+                            <Label htmlFor="job-requirements">Key requirements</Label>
                             <Input
+                                id="job-requirements"
                                 type="text"
                                 name="requirements"
                                 placeholder="React, JavaScript, HTML, CSS, Git"
                                 value={input.requirements}
                                 onChange={changeEventHandler}
-                                className="focus-visible:ring-offset-0 focus-visible:ring-0 my-1"
+                                required
+                                className="mt-1.5"
                             />
                         </div>
                         <div>
-                            <Label>Salary</Label>
+                            <Label htmlFor="job-salary">Salary</Label>
                             <Input
+                                id="job-salary"
                                 type="text"
                                 name="salary"
                                 placeholder="10 or 10 LPA"
                                 value={input.salary}
                                 onChange={changeEventHandler}
-                                className="focus-visible:ring-offset-0 focus-visible:ring-0 my-1"
+                                required
+                                className="mt-1.5"
                             />
                         </div>
                         <div>
@@ -161,21 +174,26 @@ const PostJob = () => {
                             </Select>
                         </div>
                         <div>
-                            <Label>No of Position</Label>
+                            <Label htmlFor="job-position">Number of openings</Label>
                             <Input
+                                id="job-position"
                                 type="number"
                                 name="position"
                                 placeholder="3"
                                 value={input.position}
                                 onChange={changeEventHandler}
-                                className="focus-visible:ring-offset-0 focus-visible:ring-0 my-1"
+                                min="1"
+                                required
+                                className="mt-1.5"
                             />
                         </div>
                         {
                             companies.length > 0 && (
+                                <div className="sm:col-span-2">
+                                <Label>Hiring company</Label>
                                 <Select onValueChange={selectChangeHandler}>
-                                    <SelectTrigger className="w-[180px]">
-                                        <SelectValue placeholder="Select a Company" />
+                                    <SelectTrigger className="mt-1.5 w-full">
+                                        <SelectValue placeholder="Select a company" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectGroup>
@@ -190,17 +208,18 @@ const PostJob = () => {
                                         </SelectGroup>
                                     </SelectContent>
                                 </Select>
+                                </div>
                             )
                         }
                     </div> 
                     {
-                        loading ? <Button className="w-full my-4"> <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Please wait </Button> : <Button type="submit" className="w-full my-4">Post New Job</Button>
+                        loading ? <Button disabled className="mt-7 h-11 w-full rounded-xl bg-violet-600"><Loader2 className='mr-2 h-4 w-4 animate-spin' />Publishing job...</Button> : <Button type="submit" className="mt-7 h-11 w-full rounded-xl bg-violet-600 hover:bg-violet-700">Publish job</Button>
                     }
                     {
-                        companies.length === 0 && <p className='text-xs text-red-600 font-bold text-center my-3'>*Please register a company first, before posting a jobs</p>
+                        companies.length === 0 && <p className='mt-3 rounded-xl bg-amber-50 px-4 py-3 text-center text-sm font-medium text-amber-800'>Add a company profile before publishing a job.</p>
                     }
                 </form>
-            </div>
+            </main>
         </div>
     )
 }

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { Avatar, AvatarImage } from '../ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
-import { Edit2, MoreHorizontal } from 'lucide-react'
+import { Building2, Edit2, MoreHorizontal } from 'lucide-react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
@@ -21,9 +21,9 @@ const CompaniesTable = () => {
         setFilterCompany(filteredCompany);
     },[companies,searchCompanyByText])
     return (
-        <div>
+        <div className="surface-card overflow-hidden">
             <Table>
-                <TableCaption>A list of your recent registered companies</TableCaption>
+                <TableCaption>Your registered organizations</TableCaption>
                 <TableHeader>
                     <TableRow>
                         <TableHead>Logo</TableHead>
@@ -37,12 +37,13 @@ const CompaniesTable = () => {
                         filterCompany?.map((company) => (
                             <TableRow key={company._id}>
                                 <TableCell>
-                                    <Avatar>
-                                        <AvatarImage src={company.logo}/>
+                                    <Avatar className="h-10 w-10 rounded-xl">
+                                        <AvatarImage src={company.logo} alt={`${company.name} logo`} />
+                                        <AvatarFallback className="rounded-xl bg-violet-50 text-violet-700"><Building2 className="h-4 w-4" /></AvatarFallback>
                                     </Avatar>
                                 </TableCell>
-                                <TableCell>{company.name}</TableCell>
-                                <TableCell>{company.createdAt.split("T")[0]}</TableCell>
+                                <TableCell className="font-semibold text-gray-900">{company.name}</TableCell>
+                                <TableCell className="text-sm text-gray-500">{company.createdAt?.split("T")[0] || "—"}</TableCell>
                                 <TableCell className="text-right cursor-pointer">
                                     <Popover>
                                         <PopoverTrigger><MoreHorizontal /></PopoverTrigger>
@@ -58,6 +59,13 @@ const CompaniesTable = () => {
 
                         ))
                     }
+                    {!filterCompany?.length && (
+                        <TableRow>
+                            <TableCell colSpan={4} className="py-12 text-center text-sm text-gray-500">
+                                No companies found. Add an organization to get started.
+                            </TableCell>
+                        </TableRow>
+                    )}
                 </TableBody>
             </Table>
         </div>

@@ -31,8 +31,21 @@ const userSchema = new mongoose.Schema({
         company:{type:mongoose.Schema.Types.ObjectId, ref:'Company'}, 
         profilePhoto:{
             type:String,
-            default:""
+            default:"/default-avatar.svg"
         }
     },
+    savedJobs:[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'Job'
+    }],
+    jobAlertPreferences:{
+        enabled:{type:Boolean, default:false},
+        keyword:{type:String, default:""},
+        locations:[{type:String}],
+        jobTypes:[{type:String}],
+        experienceLevels:[{type:String}],
+        minSalary:{type:Number, default:null},
+        maxSalary:{type:Number, default:null}
+    }
 },{timestamps:true});
 export const User = mongoose.model('User', userSchema);

@@ -23,9 +23,9 @@ const AdminJobsTable = () => {
         setFilterJobs(filteredJobs);
     },[allAdminJobs,searchJobByText])
     return (
-        <div>
+        <div className="surface-card overflow-hidden">
             <Table>
-                <TableCaption>A list of your recent  posted jobs</TableCaption>
+                <TableCaption>Your posted roles and applicant activity</TableCaption>
                 <TableHeader>
                     <TableRow>
                         <TableHead>Company Name</TableHead>
@@ -37,10 +37,10 @@ const AdminJobsTable = () => {
                 <TableBody>
                     {
                         filterJobs?.map((job) => (
-                            <tr key={job._id}>
-                                <TableCell>{job?.company?.name}</TableCell>
-                                <TableCell>{job?.title}</TableCell>
-                                <TableCell>{job?.createdAt.split("T")[0]}</TableCell>
+                            <TableRow key={job._id}>
+                                <TableCell className="font-medium text-gray-700">{job?.company?.name}</TableCell>
+                                <TableCell className="font-semibold text-gray-900">{job?.title}</TableCell>
+                                <TableCell className="text-sm text-gray-500">{job?.createdAt?.split("T")[0] || "—"}</TableCell>
                                 <TableCell className="text-right cursor-pointer">
                                     <Popover>
                                         <PopoverTrigger><MoreHorizontal /></PopoverTrigger>
@@ -56,10 +56,17 @@ const AdminJobsTable = () => {
                                         </PopoverContent>
                                     </Popover>
                                 </TableCell>
-                            </tr>
+                            </TableRow>
 
                         ))
                     }
+                    {!filterJobs?.length && (
+                        <TableRow>
+                            <TableCell colSpan={4} className="py-12 text-center text-sm text-gray-500">
+                                No job posts found. Create your first role to start building your team.
+                            </TableCell>
+                        </TableRow>
+                    )}
                 </TableBody>
             </Table>
         </div>

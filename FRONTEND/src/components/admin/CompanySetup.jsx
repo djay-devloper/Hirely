@@ -66,30 +66,34 @@ const CompanySetup = () => {
 
     useEffect(() => {
         setInput({
-            name: singleCompany.name || "",
-            description: singleCompany.description || "",
-            website: singleCompany.website || "",
-            location: singleCompany.location || "",
-            file: singleCompany.file || null
+            name: singleCompany?.name || "",
+            description: singleCompany?.description || "",
+            website: singleCompany?.website || "",
+            location: singleCompany?.location || "",
+            file: null
         })
     },[singleCompany]);
 
     return (
         <div>
             <Navbar />
-            <div className='max-w-xl mx-auto my-10'>
-                <form onSubmit={submitHandler}>
-                    <div className='flex items-center gap-5 p-8'>
-                        <Button onClick={() => navigate("/admin/companies")} variant="outline" className="flex items-center gap-2 text-gray-500 font-semibold">
+            <main className="page-container py-8 sm:py-10">
+                <form onSubmit={submitHandler} className="surface-card mx-auto max-w-2xl p-5 sm:p-8">
+                    <div className='mb-7 flex flex-wrap items-center gap-4'>
+                        <Button type="button" onClick={() => navigate("/admin/companies")} variant="outline" className="flex items-center gap-2 rounded-xl text-gray-600">
                             <ArrowLeft />
                             <span>Back</span>
                         </Button>
-                        <h1 className='font-bold text-xl'>Company Setup</h1>
-                    </div>
-                    <div className='grid grid-cols-2 gap-4'>
                         <div>
-                            <Label>Company Name</Label>
+                            <p className="text-xs font-semibold uppercase tracking-wide text-violet-700">Company profile</p>
+                            <h1 className='text-2xl font-bold tracking-tight text-gray-950'>Edit company details</h1>
+                        </div>
+                    </div>
+                    <div className='grid gap-5 sm:grid-cols-2'>
+                        <div>
+                            <Label htmlFor="company-name">Company name</Label>
                             <Input
+                                id="company-name"
                                 type="text"
                                 name="name"
                                 value={input.name}
@@ -97,8 +101,9 @@ const CompanySetup = () => {
                             />
                         </div>
                         <div>
-                            <Label>Description</Label>
+                            <Label htmlFor="company-description">Description</Label>
                             <Input
+                                id="company-description"
                                 type="text"
                                 name="description"
                                 value={input.description}
@@ -106,8 +111,9 @@ const CompanySetup = () => {
                             />
                         </div>
                         <div>
-                            <Label>Website</Label>
+                            <Label htmlFor="company-website">Website</Label>
                             <Input
+                                id="company-website"
                                 type="text"
                                 name="website"
                                 value={input.website}
@@ -115,8 +121,9 @@ const CompanySetup = () => {
                             />
                         </div>
                         <div>
-                            <Label>Location</Label>
+                            <Label htmlFor="company-location">Location</Label>
                             <Input
+                                id="company-location"
                                 type="text"
                                 name="location"
                                 value={input.location}
@@ -124,19 +131,21 @@ const CompanySetup = () => {
                             />
                         </div>
                         <div>
-                            <Label>Logo</Label>
+                            <Label htmlFor="company-logo">Company logo</Label>
                             <Input
+                                id="company-logo"
                                 type="file"
-                                accept="image/*"
+                                accept="image/jpeg,image/png,image/webp"
                                 onChange={changeFileHandler}
                             />
+                            <p className="mt-1 text-xs text-gray-500">JPG, PNG, or WebP format</p>
                         </div>
                     </div>
                     {
-                        loading ? <Button className="w-full my-4"> <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Please wait </Button> : <Button type="submit" className="w-full my-4">Update</Button>
+                        loading ? <Button disabled className="my-6 h-11 w-full rounded-xl bg-violet-600"><Loader2 className='mr-2 h-4 w-4 animate-spin' />Saving changes...</Button> : <Button type="submit" className="my-6 h-11 w-full rounded-xl bg-violet-600 hover:bg-violet-700">Save company details</Button>
                     }
                 </form>
-            </div>
+            </main>
 
         </div>
     )

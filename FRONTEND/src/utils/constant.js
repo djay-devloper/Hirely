@@ -4,3 +4,6 @@ export const USER_API_END_POINT = `${API_BASE_URL}/api/v1/user`;
 export const JOB_API_END_POINT = `${API_BASE_URL}/api/v1/job`;
 export const APPLICATION_API_END_POINT = `${API_BASE_URL}/api/v1/application`;
 export const COMPANY_API_END_POINT = `${API_BASE_URL}/api/v1/company`;
+export const SAVED_JOBS_API_END_POINT = `${API_BASE_URL}/api/v1/saved-jobs`;
+export const NOTIFICATIONS_API_END_POINT = `${API_BASE_URL}/api/v1/notifications`;
+export const COPILOT_API_END_POINT = `${API_BASE_URL}/api/v1/copilot`;

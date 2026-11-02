@@ -4,11 +4,12 @@ import { Badge } from './ui/badge'
 import { useSelector } from 'react-redux'
 
 const AppliedJobTable = () => {
-    const {allAppliedJobs} = useSelector(store=>store.job);
+    const { allAppliedJobs: storedAppliedJobs } = useSelector(store => store.job);
+    const allAppliedJobs = Array.isArray(storedAppliedJobs) ? storedAppliedJobs : [];
     return (
-        <div>
+        <div className="surface-card overflow-hidden">
             <Table>
-                <TableCaption>A list of your applied jobs</TableCaption>
+                <TableCaption>Your recent applications and their current status</TableCaption>
                 <TableHeader>
                     <TableRow>
                         <TableHead>Date</TableHead>
@@ -19,12 +20,22 @@ const AppliedJobTable = () => {
                 </TableHeader>
                 <TableBody>
                     {
-                        allAppliedJobs.length <= 0 ? <span>You haven&apos;t applied any job yet.</span> : allAppliedJobs.map((appliedJob) => (
+                        allAppliedJobs.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={4} className="py-10 text-center text-sm text-gray-500">
+                                    You haven&apos;t applied to any jobs yet. Your applications will appear here.
+                                </TableCell>
+                            </TableRow>
+                        ) : allAppliedJobs.map((appliedJob) => (
                             <TableRow key={appliedJob._id}>
-                                <TableCell>{appliedJob?.createdAt?.split("T")[0]}</TableCell>
-                                <TableCell>{appliedJob.job?.title}</TableCell>
-                                <TableCell>{appliedJob.job?.company?.name}</TableCell>
-                                <TableCell className="text-right"><Badge className={`${appliedJob?.status === "rejected" ? 'bg-red-400' : appliedJob.status === 'pending' ? 'bg-gray-400' : 'bg-green-400'}`}>{appliedJob.status.toUpperCase()}</Badge></TableCell>
+                                <TableCell className="text-sm text-gray-500">{appliedJob?.createdAt?.split("T")[0] || "—"}</TableCell>
+                                <TableCell className="font-semibold text-gray-900">{appliedJob?.job?.title || "Role unavailable"}</TableCell>
+                                <TableCell className="text-gray-600">{appliedJob?.job?.company?.name || "—"}</TableCell>
+                                <TableCell className="text-right">
+                                    <Badge className={`rounded-lg ${appliedJob?.status === "rejected" ? "bg-red-50 text-red-700" : appliedJob?.status === "pending" ? "bg-amber-50 text-amber-800" : "bg-emerald-50 text-emerald-700"}`}>
+                                        {appliedJob?.status?.toUpperCase() || "PENDING"}
+                                    </Badge>
+                                </TableCell>
                             </TableRow>
                         ))
                     }

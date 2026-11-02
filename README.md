@@ -42,14 +42,21 @@ The goal of this project is to provide a complete job portal experience with:
 - User registration and login
 - Role-based authentication for students and recruiters
 - Update personal profile information
+- View and update a profile picture
+- Use a default profile picture when no photo is uploaded
 - Upload and manage a PDF resume
 - Search jobs by keyword
-- Filter jobs by location, job type, and experience
+- Filter jobs by location, job type, experience, and salary range
+- Combine filters, sort results, and browse paginated, shareable search URLs
+- Save jobs to a personal list
+- Create matching job alerts with in-app notifications and optional SMTP email delivery
+- See an explainable skills-to-requirements match on job cards and details
 - View jobs on the home page and browse section
 - Open individual job details
 - Apply for jobs
 - View applied jobs and their current status
 - See hiring decisions such as pending, accepted, or rejected
+- Use the Gemini-powered Job Match Copilot to find semantically relevant jobs, review resume evidence, and ask questions grounded in a job listing
 
 ### Recruiter features
 - Recruiter-only protected routes
@@ -57,6 +64,7 @@ The goal of this project is to provide a complete job portal experience with:
 - Company details and logo update
 - Job posting with structured data
 - Review all jobs posted by the recruiter
+- View recruiter analytics for applications, outcomes, and jobs attracting applicants
 - View applicant lists for each job
 - Open applicant resumes
 - Update applicant status to accepted or rejected
@@ -135,7 +143,20 @@ CLOUD_NAME=your_cloudinary_cloud_name
 API_KEY=your_cloudinary_api_key
 API_SECRET=your_cloudinary_api_secret
 PORT=8000
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your_smtp_username
+SMTP_PASSWORD=your_smtp_password
+SMTP_FROM=Hirely <alerts@example.com>
+GEMINI_API_KEY=your_gemini_api_key
+GEMINI_MODEL=gemini-3.8-flash
+GEMINI_EMBEDDING_MODEL=gemini-embedding-001
 ```
+
+SMTP values are needed to deliver job-alert emails. In-app alerts continue to work without SMTP configuration.
+
+Gemini values are needed for the Job Match Copilot. Keep the API key in the backend `.env` only; it is never sent to the frontend. The default models (`gemini-3.8-flash` and `gemini-embedding-001`) can be overridden with `GEMINI_MODEL` and `GEMINI_EMBEDDING_MODEL`.
 
 ### Frontend
 Create a `.env` file inside the `FRONTEND` folder if needed:
@@ -214,6 +235,12 @@ http://localhost:5173
 - `GET /api/v1/application/:id/applicants` — get all applicants for a job
 - `POST /api/v1/application/status/:id/update` — update applicant status
 
+### AI Copilot routes
+- `POST /api/v1/copilot/matches` — candidate-only; requires `{ "consent": true }`, extracts the saved PDF resume, and returns semantically ranked jobs with evidence-based comparisons
+- `POST /api/v1/copilot/chat` — candidate-only; accepts `{ "jobId": "...", "question": "..." }` and answers from that job listing only
+
+The Copilot sends a candidate's resume to Google Gemini only after the candidate opts in. Resume content and generated analyses are not stored by the Copilot; job embeddings are cached on job records to avoid recomputing them. Similarity scores indicate text relevance, not qualification or hiring likelihood. Configure a Gemini API key in the backend environment before using the feature.
+
 ## Current project status
 
 Hirely is currently a functional MVP that covers the full core hiring cycle:
@@ -258,7 +285,7 @@ These remain the strongest opportunities for future growth:
 - strengthen backend validation and role-based safeguards
 
 ### Long-term vision
-- AI-based candidate matching
+- Expand the explainable, candidate-controlled AI job matching experience
 - interview scheduling and communication modules
 - multi-company hiring dashboards
 - cloud deployment with monitoring and production-grade scaling

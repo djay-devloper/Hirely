@@ -3,7 +3,6 @@ import Login from './components/auth/Login'
 import Signup from './components/auth/Signup'
 import Home from './components/Home'
 import Jobs from './components/Jobs'
-import Browse from './components/Browse'
 import Profile from './components/Profile'
 import JobDescription from './components/JobDescription'
 import Companies from './components/admin/Companies'
@@ -13,6 +12,10 @@ import AdminJobs from "./components/admin/AdminJobs";
 import PostJob from './components/admin/PostJob'
 import Applicants from './components/admin/Applicants'
 import ProtectedRoute from './components/admin/ProtectedRoute'
+import SavedJobs from './components/SavedJobs'
+import Notifications from './components/Notifications'
+import Analytics from './components/admin/Analytics'
+import Copilot from './components/Copilot'
 
 
 const appRouter = createBrowserRouter([
@@ -37,12 +40,20 @@ const appRouter = createBrowserRouter([
     element: <JobDescription />
   },
   {
-    path: "/browse",
-    element: <Browse />
-  },
-  {
     path: "/profile",
     element: <Profile />
+  },
+  {
+    path: "/copilot",
+    element: <Copilot />
+  },
+  {
+    path:"/saved-jobs",
+    element:<SavedJobs />
+  },
+  {
+    path:"/notifications",
+    element:<Notifications />
   },
   // admin ke liye yha se start hoga
   {
@@ -60,6 +71,10 @@ const appRouter = createBrowserRouter([
   {
     path:"/admin/jobs",
     element:<ProtectedRoute><AdminJobs/></ProtectedRoute> 
+  },
+  {
+    path:"/admin/analytics",
+    element:<ProtectedRoute><Analytics/></ProtectedRoute>
   },
   {
     path:"/admin/jobs/create",

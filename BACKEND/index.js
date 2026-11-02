@@ -7,6 +7,9 @@ import userRoute from "./routes/user.route.js";
 import companyRoute from "./routes/company.route.js";
 import jobRoute from "./routes/job.route.js";
 import applicationRoute from "./routes/application.route.js";
+import savedJobRoute from "./routes/savedJob.route.js";
+import notificationRoute from "./routes/notification.route.js";
+import copilotRoute from "./routes/copilot.route.js";
 
 dotenv.config({ path: new URL(".env", import.meta.url) });
 
@@ -56,6 +59,9 @@ app.use("/api/v1/user", userRoute);
 app.use("/api/v1/company", companyRoute);
 app.use("/api/v1/job", jobRoute);
 app.use("/api/v1/application", applicationRoute);
+app.use("/api/v1/saved-jobs", savedJobRoute);
+app.use("/api/v1/notifications", notificationRoute);
+app.use("/api/v1/copilot", copilotRoute);
 
 const startServer = async () => {
     await connectDB();

@@ -1,121 +1,185 @@
-import React from 'react'
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
-import { Button } from '../ui/button'
+import React, { useEffect, useState } from 'react'
 import { Avatar, AvatarImage } from '../ui/avatar'
-import { LogOut, User2 } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Button } from '../ui/button'
+import { LogOut, Menu, Sparkles, UserRound, X } from 'lucide-react'
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
 import { useDispatch, useSelector } from 'react-redux'
 import axios from 'axios'
 import { USER_API_END_POINT } from '@/utils/constant'
 import { setUser } from '@/redux/authSlice'
 import { toast } from 'sonner'
+import NotificationLink from '../NotificationLink'
 
 const Navbar = () => {
     const { user } = useSelector(store => store.auth);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const location = useLocation();
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    useEffect(() => {
+        setMobileMenuOpen(false);
+    }, [location.pathname]);
 
     const logoutHandler = async () => {
         try {
-            const res = await axios.get(`${USER_API_END_POINT}/logout`, { withCredentials: true });
-            if (res.data.success) {
+            const response = await axios.get(`${USER_API_END_POINT}/logout`, { withCredentials: true });
+            if (response.data.success) {
                 dispatch(setUser(null));
                 navigate("/");
-                toast.success(res.data.message);
+                toast.success(response.data.message);
             }
         } catch (error) {
-            console.log(error);
-            toast.error(error.response.data.message);
+            console.error("Unable to log out:", error);
+            toast.error(error.response?.data?.message || "Unable to log out. Please try again.");
         }
-    }
-    return (
-        <div className='bg-white'>
-            <div className='flex items-center justify-between mx-auto max-w-7xl h-16'>
-                <div>
-                    <Link
-                        to="/"
-                        aria-label="Hirely home"
-                        className="group flex items-center gap-2"
+    };
+
+    const navLinkClass = ({ isActive }) => `site-nav-link ${isActive ? "text-violet-800" : ""}`;
+    const navigation = user?.role === "recruiter"
+        ? [
+            { label: "Dashboard", to: "/admin/companies" },
+            { label: "Jobs", to: "/admin/jobs" },
+            { label: "Analytics", to: "/admin/analytics" }
+        ]
+        : [
+            { label: "Home", to: "/" },
+            { label: "Explore jobs", to: "/jobs" },
+            ...(user?.role === "student" ? [
+                { label: "AI Copilot", to: "/copilot" },
+                { label: "Saved jobs", to: "/saved-jobs" }
+            ] : [])
+        ];
+
+    const renderNavigation = () => (
+        <>
+            {navigation.map(({ label, to }) => (
+                <li key={to}>
+                    <NavLink
+                        to={to}
+                        end={to === "/"}
+                        className={to === "/copilot" ? "site-nav-ai-link" : navLinkClass}
                     >
-                        <img
-                            src="/logo.svg"
-                            alt="Hirely"
-                            className="h-10 w-10 object-contain transition-transform duration-200 group-hover:scale-105"
+                        {to === "/copilot" && <Sparkles aria-hidden="true" className="h-4 w-4" />}
+                        {label}
+                    </NavLink>
+                </li>
+            ))}
+            {user?.role === "student" && (
+                <li className="flex items-center px-3 py-2">
+                    <NotificationLink userId={user._id} />
+                </li>
+            )}
+        </>
+    );
+
+    const userMenu = user && (
+        <Popover>
+            <PopoverTrigger asChild>
+                <button
+                    type="button"
+                    aria-label="Open account menu"
+                    className="flex items-center gap-2 rounded-full p-1 pr-2 transition hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                >
+                    <Avatar className="h-9 w-9 ring-2 ring-white">
+                        <AvatarImage
+                            src={user?.profile?.profilePhoto || "/default-avatar.svg"}
+                            alt={`${user?.fullname || "User"} profile`}
+                            onError={event => { event.currentTarget.src = "/default-avatar.svg"; }}
                         />
-                        <span className="text-2xl font-extrabold tracking-tight text-gray-900">
-                            Hire<span className="text-[#F83002]">ly</span>
-                        </span>
-                    </Link>
+                    </Avatar>
+                    <span className="hidden max-w-32 truncate text-sm font-medium text-gray-700 sm:block">{user.fullname}</span>
+                </button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-72 rounded-2xl border-gray-200 p-3 shadow-xl">
+                <div className="flex items-center gap-3 border-b border-gray-100 px-2 pb-3">
+                    <Avatar className="h-11 w-11">
+                        <AvatarImage
+                            src={user?.profile?.profilePhoto || "/default-avatar.svg"}
+                            alt={`${user?.fullname || "User"} profile`}
+                            onError={event => { event.currentTarget.src = "/default-avatar.svg"; }}
+                        />
+                    </Avatar>
+                    <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-gray-900">{user.fullname}</p>
+                        <p className="truncate text-xs text-gray-500">{user.email}</p>
+                    </div>
                 </div>
-                <div className='flex items-center gap-12'>
-                    <ul className='flex font-medium items-center gap-5'>
-                        {
-                            user && user.role === 'recruiter' ? (
-                                <>
-                                    <li><Link to="/admin/companies">Companies</Link></li>
-                                    <li><Link to="/admin/jobs">Jobs</Link></li>
-                                </>
-                            ) : (
-                                <>
-                                    <li><Link to="/">Home</Link></li>
-                                    <li><Link to="/jobs">Jobs</Link></li>
-                                    <li><Link to="/browse">Browse</Link></li>
-                                </>
-                            )
-                        }
+                <div className="grid gap-1 pt-2">
+                    <Button asChild variant="ghost" className="justify-start rounded-xl">
+                        <Link to="/profile"><UserRound className="mr-2 h-4 w-4" />View profile</Link>
+                    </Button>
+                    <Button type="button" onClick={logoutHandler} variant="ghost" className="justify-start rounded-xl text-gray-600 hover:text-red-600">
+                        <LogOut className="mr-2 h-4 w-4" />Sign out
+                    </Button>
+                </div>
+            </PopoverContent>
+        </Popover>
+    );
 
+    return (
+        <header className="site-header">
+            <div className="site-header-inner">
+                <Link to="/" aria-label="Hirely home" className="flex shrink-0 items-center gap-2">
+                    <img src="/logo.svg" alt="" className="h-9 w-9 object-contain" />
+                    <span className="text-xl font-extrabold tracking-tight text-gray-950">
+                        Hire<span className="text-violet-600">ly</span>
+                    </span>
+                </Link>
 
-                    </ul>
-                    {
-                        !user ? (
-                            <div className='flex items-center gap-2'>
-                                <Link to="/login"><Button variant="outline">Login</Button></Link>
-                                <Link to="/signup"><Button className="bg-[#6A38C2] hover:bg-[#5b30a6]">Signup</Button></Link>
-                            </div>
-                        ) : (
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Avatar className="cursor-pointer">
-                                        <AvatarImage src={user?.profile?.profilePhoto} alt="@shadcn" />
-                                    </Avatar>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-80">
-                                    <div className=''>
-                                        <div className='flex gap-2 space-y-2'>
-                                            <Avatar className="cursor-pointer">
-                                                <AvatarImage src={user?.profile?.profilePhoto} alt="@shadcn" />
-                                            </Avatar>
-                                            <div>
-                                                <h4 className='font-medium'>{user?.fullname}</h4>
-                                                <p className='text-sm text-muted-foreground'>{user?.profile?.bio}</p>
-                                            </div>
-                                        </div>
-                                        <div className='flex flex-col my-2 text-gray-600'>
-                                            {
-                                                user && user.role === 'student' && (
-                                                    <div className='flex w-fit items-center gap-2 cursor-pointer'>
-                                                        <User2 />
-                                                        <Button variant="link"> <Link to="/profile">View Profile</Link></Button>
-                                                    </div>
-                                                )
-                                            }
+                <nav aria-label="Main navigation" className="hidden md:block">
+                    <ul className="flex items-center gap-1">{renderNavigation()}</ul>
+                </nav>
 
-                                            <div className='flex w-fit items-center gap-2 cursor-pointer'>
-                                                <LogOut />
-                                                <Button onClick={logoutHandler} variant="link">Logout</Button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </PopoverContent>
-                            </Popover>
-                        )
-                    }
+                <div className="hidden items-center gap-3 md:flex">
+                    {!user ? (
+                        <>
+                            <Button asChild variant="ghost" className="rounded-xl text-gray-700">
+                                <Link to="/login">Sign in</Link>
+                            </Button>
+                            <Button asChild className="rounded-xl bg-violet-600 px-5 shadow-sm hover:bg-violet-700">
+                                <Link to="/signup">Create account</Link>
+                            </Button>
+                        </>
+                    ) : userMenu}
+                </div>
 
+                <div className="flex items-center gap-2 md:hidden">
+                    {user && userMenu}
+                    <Button
+                        type="button"
+                        size="icon"
+                        variant="outline"
+                        aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+                        aria-expanded={mobileMenuOpen}
+                        onClick={() => setMobileMenuOpen(current => !current)}
+                        className="h-10 w-10 rounded-xl border-gray-200"
+                    >
+                        {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                    </Button>
                 </div>
             </div>
 
-        </div>
-    )
-}
+            {mobileMenuOpen && (
+                <div className="border-t border-gray-100 bg-white px-4 py-3 shadow-lg md:hidden">
+                    <nav aria-label="Mobile navigation">
+                        <ul className="grid gap-1">{renderNavigation()}</ul>
+                    </nav>
+                    {!user && (
+                        <div className="mt-3 grid grid-cols-2 gap-2 border-t border-gray-100 pt-3">
+                            <Button asChild variant="outline" className="rounded-xl">
+                                <Link to="/login">Sign in</Link>
+                            </Button>
+                            <Button asChild className="rounded-xl bg-violet-600 hover:bg-violet-700">
+                                <Link to="/signup">Create account</Link>
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            )}
+        </header>
+    );
+};
 
-export default Navbar
+export default Navbar;

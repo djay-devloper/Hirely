@@ -16,6 +16,10 @@ const jobSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    salaryMin: {
+        type:Number,
+        min:0
+    },
     experienceLevel:{
         type:String,
         required:true,
@@ -47,6 +51,8 @@ const jobSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Application',
         }
-    ]
+    ],
+    semanticEmbedding:{ type:[Number], select:false },
+    semanticEmbeddingModel:{ type:String, select:false }
 },{timestamps:true});
 export const Job = mongoose.model("Job", jobSchema);

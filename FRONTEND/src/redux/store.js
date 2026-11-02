@@ -16,8 +16,24 @@ import applicationSlice from "./applicationSlice";
 
 const persistConfig = {
     key: 'root',
-    version: 1,
+    version: 2,
     storage,
+    migrate: async (state) => {
+        if (!state) return state;
+        return {
+            ...state,
+            job: {
+                ...state.job,
+                savedJobs: Array.isArray(state.job?.savedJobs) ? state.job.savedJobs : [],
+                jobsPagination: state.job?.jobsPagination || {
+                    page: 1,
+                    limit: 12,
+                    totalJobs: 0,
+                    totalPages: 0
+                }
+            }
+        };
+    }
 }
 
 const rootReducer = combineReducers({
